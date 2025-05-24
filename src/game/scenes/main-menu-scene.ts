@@ -7,7 +7,7 @@ export class MainMenu extends Phaser.Scene {
     private menuItems: Phaser.GameObjects.Text[] = [];
     private selectedItemIndex = 0;
     private lastInputTime = 0;
-    private inputDelay = 200; // Задержка между вводами в ms
+    private inputDelay = 200;
     private title!: Phaser.GameObjects.Text;
 
     constructor() {
@@ -15,6 +15,9 @@ export class MainMenu extends Phaser.Scene {
     }
 
     create() {
+        // Сохраняем выбранный индекс при перезаходе
+        this.selectedItemIndex = this.registry.get('selectedMenuItemIndex') || 0;
+        
         this.add.rectangle(0, 0, 50, 50, 0x000000)
             .setOrigin(0)
             .setDepth(1000);
@@ -23,7 +26,7 @@ export class MainMenu extends Phaser.Scene {
         this.createTitle();
         this.createMenuItems();
         this.setupInput();
-        this.selectMenuItem(0);
+        this.selectMenuItem(this.selectedItemIndex);
 
         EventBus.emit('current-scene-ready', this);
     }
@@ -52,15 +55,16 @@ export class MainMenu extends Phaser.Scene {
     private createMenuItems() {
         this.menuItems = [
             this.createMenuItem(300, 'Game Start', () => {
+                this.registry.set('selectedMenuItemIndex', 0);
                 this.scene.start('GameScene');
             }),
             this.createMenuItem(400, 'Records', () => {
-                console.log('Records screen');
-                // this.scene.start('RecordsScene');
+                this.registry.set('selectedMenuItemIndex', 1);
+                this.scene.start('RecordsScene');
             }),
             this.createMenuItem(500, 'Options', () => {
-                console.log('Options screen');
-                // this.scene.start('OptionsScene');
+                this.registry.set('selectedMenuItemIndex', 2);
+                this.scene.start('OptionsScene');
             })
         ];
     }

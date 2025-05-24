@@ -1,4 +1,5 @@
 import { EventBusComponent } from '@/game/components/events/event-bus-component';
+import { LocalStorageManager } from '@/game/managers/local-storage-manager';
 import { CUSTOM_EVENTS } from '@/game/types/custom-events';
 import Phaser from 'phaser';
 
@@ -30,6 +31,17 @@ export class Weapons extends Phaser.GameObjects.Container {
         }).setOrigin(0, 0);
         
         this.add([this.weaponTypeText, this.powerText]);
+
+        const settings = LocalStorageManager.loadSettings();
+        this.updateWeaponType(this.mapWeaponType(settings.weaponType));
+    }
+
+    private mapWeaponType(type: 'wide' | 'laser' | 'rockets'): 1 | 2 | 3 {
+        switch (type) {
+            case 'wide': return 1;
+            case 'laser': return 2;
+            case 'rockets': return 3;
+        }
     }
 
     private setupEventListeners(): void {
@@ -43,6 +55,7 @@ export class Weapons extends Phaser.GameObjects.Container {
     }
 
     private updateWeaponType(type: number): void {
+        console.log(type);
         let typeChar = 'W';
         switch(type) {
             case 2: typeChar = 'L'; break;

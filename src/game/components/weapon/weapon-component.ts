@@ -4,6 +4,7 @@ import { InputComponent } from '../input/input-component';
 import { CUSTOM_EVENTS } from '@/game/types/custom-events';
 import * as CONFIG from '@/game/configs/game-config';
 import { BulletConfig, HomingPrimaryConfig, WeaponPattern } from '@/game/types/interfaces';
+import { LocalStorageManager } from '@/game/managers/local-storage-manager';
 
 export class WeaponComponent {
     private gameObject: Phaser.Physics.Arcade.Sprite;
@@ -12,7 +13,7 @@ export class WeaponComponent {
     private fireTimer = 0;
     private eventBusComponent: EventBusComponent;
     
-    private weaponType: 1 | 2 | 3 = 1;
+    private weaponType: 1 | 2 | 3;
     private bulletConfig: BulletConfig;
     private currentPower = 0;
     private maxPower = 300;
@@ -41,6 +42,10 @@ export class WeaponComponent {
         this.eventBusComponent = eventBusComponent;
         this.bulletConfig = { ...CONFIG.PLAYER_WEAPON_CONFIG.base };
         this.homingPrimaryConfig = { ...CONFIG.PLAYER_WEAPON_CONFIG.homing.primary };
+
+        const settings = LocalStorageManager.loadSettings();
+        this.weaponType = this.mapWeaponType(settings.weaponType);
+        this.eventBusComponent.emit(CUSTOM_EVENTS.WEAPON_CHANGED, { weaponType: this.weaponType });
 
         if (this.bulletGroup) {
             this.destroyGroup(this.bulletGroup);
@@ -115,6 +120,14 @@ export class WeaponComponent {
         this.eventBusComponent.on(CUSTOM_EVENTS.ADD_POWER, (amount: number) => {
             this.addPower(amount);
         });
+    }
+
+    private mapWeaponType(type: 'wide' | 'laser' | 'rockets'): 1 | 2 | 3 {
+        switch (type) {
+            case 'wide': return 1;
+            case 'laser': return 2;
+            case 'rockets': return 3;
+        }
     }
 
     update(delta: number): void {

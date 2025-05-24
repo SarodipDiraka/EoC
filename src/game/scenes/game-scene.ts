@@ -5,7 +5,7 @@ import { EnemyDestroyedComponent } from '../components/spawners/enemy-destroyed-
 import { Score } from '../entities/ui/score';
 import { Lives } from '../entities/ui/lives';
 import { LevelManager } from '../managers/level-manager';
-import { LevelConfig } from '../types/interfaces';
+import { GameSettings, LevelConfig } from '../types/interfaces';
 import { levels } from '../configs/game-config';
 import { CUSTOM_EVENTS } from '../types/custom-events';
 import { FighterEnemy } from '../entities/enemies/common/fighter-enemy';
@@ -18,6 +18,7 @@ import { FPSDisplay } from '../entities/ui/fps-display';
 import { ItemManager } from '../managers/item-manager';
 import { CircularFighterEnemy } from '../entities/enemies/common/circular-fighter-enemy';
 import { AudioManager } from '../managers/audio-manager';
+import { LocalStorageManager } from '../managers/local-storage-manager';
 
 export class GameScene extends Phaser.Scene {
     private player!: Player;
@@ -39,6 +40,8 @@ export class GameScene extends Phaser.Scene {
     private fpsDisplay!: FPSDisplay;
     private itemManager!: ItemManager;
 
+    private currentSettings: GameSettings;
+
     
     constructor() {
         super({ key: 'GameScene' });
@@ -46,6 +49,7 @@ export class GameScene extends Phaser.Scene {
 
     create() {
         this.cleanup();
+        this.currentSettings = LocalStorageManager.loadSettings();
         this.isPaused = false;
         this.time.paused = false;
         this.physics.world.resume();
@@ -70,7 +74,6 @@ export class GameScene extends Phaser.Scene {
         this.currentLevel = 0;
 
         EventBus.emit('current-scene-ready', this);
-        EventBus.emit(CUSTOM_EVENTS.WEAPON_CHANGED, { weaponType: 1 });
         EventBus.emit(CUSTOM_EVENTS.POWER_CHANGED, 0);
     }
 
@@ -214,7 +217,9 @@ export class GameScene extends Phaser.Scene {
         this.livesSystem = new Lives(this, EventBus);
         this.bombCounter = new Bombs(this, EventBus);
         this.weaponDisplay = new Weapons(this, EventBus);
-        this.fpsDisplay = new FPSDisplay(this, 470, 630);
+        if (this.currentSettings.showFPS) {
+            this.fpsDisplay = new FPSDisplay(this, 470, 630);
+        }
     }
 
     update() {
@@ -233,7 +238,9 @@ export class GameScene extends Phaser.Scene {
             this.togglePause();
         }
 
-        this.fpsDisplay.update();
+        if (this.currentSettings.showFPS) {
+            this.fpsDisplay.update();
+        }
         
         this.registry.set('player', this.player);
     }

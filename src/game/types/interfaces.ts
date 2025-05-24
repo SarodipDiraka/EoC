@@ -188,3 +188,17 @@ export interface BossPhaseDropConfig {
     count: number;
     spread: number;
 }
+
+export interface GameSettings {
+    musicVolume: number;
+    sfxVolume: number;
+    showFPS: boolean;
+    weaponType: 'wide' | 'laser' | 'rockets';
+}
+
+export interface HighScoreRecord {
+    name: string;
+    score: number;
+    level: number | 'All';
+    date: string;
+}

@@ -17,6 +17,7 @@ export const CUSTOM_EVENTS = Object.freeze({
     PLAYER_BOMB_DAMAGE_TICK: 'player-bomb-damage-tick',
     BOMB_COUNT_CHANGED: 'bomb-count-changed',
     POWER_CHANGED: 'power-changed',
+    SETTINGS_CHANGED: 'SETTINGS_CHANGED',
 
     ADD_POWER: 'add-power',
     ADD_SCORE: 'add-score',

@@ -7,6 +7,8 @@ import { PreloadScene } from './scenes/preload-scene';
 import { Game, AUTO } from 'phaser';
 import { LevelCompleteScene } from './scenes/level-complete-scene';
 import { VictoryScene } from './scenes/victory-scene';
+import { OptionsScene } from './scenes/options-scene';
+import { RecordsScene } from './scenes/records-scene';
 
 const config: Phaser.Types.Core.GameConfig = {
     type: AUTO,
@@ -27,7 +29,7 @@ const config: Phaser.Types.Core.GameConfig = {
             debug: false
         }
     },
-    scene: [BootScene, PreloadScene, MainMenu, GameScene, PauseMenu, GameOver, LevelCompleteScene, VictoryScene]
+    scene: [BootScene, PreloadScene, MainMenu, GameScene, PauseMenu, GameOver, LevelCompleteScene, VictoryScene, RecordsScene, OptionsScene ]
 };
 
 const StartGame = (parent: string) => {
