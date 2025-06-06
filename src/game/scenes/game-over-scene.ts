@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { EventBus } from '../event-bus';
 import { MenuInputComponent } from '../components/input/human/menu-input-component';
+import { LocalStorageManager } from '../managers/local-storage-manager';
 
 export class GameOver extends Phaser.Scene {
     private menuInput!: MenuInputComponent;
@@ -81,17 +82,70 @@ export class GameOver extends Phaser.Scene {
                 this.sound.stopAll();
                 this.scene.stop();
                 EventBus.emit('restart-game');
-                this.scene.start('GameScene');
             }),
             this.createMenuItem(500, 'SAVE RESULT', '#ffffff', () => {
-                console.log('Save score:', this.score);
+                if (LocalStorageManager.isScoreInTop(this.score)) {
+                    this.scene.launch('InputScene', { 
+                        score: this.score, 
+                        level: this.registry.get('currentLevel') || 1
+                    });
+                } else {
+                    this.showMessage('Score too low for top 10');
+                }
             }),
             this.createMenuItem(600, 'MAIN MENU', '#ffffff', () => {
                 this.sound.stopAll();
-                this.scene.start('MainMenu');
-                this.scene.stop('GameScene');
+                this.scene.stop();
+                EventBus.emit('main-menu-from-game-over');
             })
         ];
+    }
+
+    private showMessage(text: string) {
+        // Удаляем предыдущее сообщение, если оно есть
+        const existingMessage = this.children.getByName('statusMessage');
+        if (existingMessage) {
+            existingMessage.destroy();
+        }
+
+        // Создаем новое сообщение с именем для последующего удаления
+        const message = this.add.text(
+            this.cameras.main.width / 2,
+            this.cameras.main.height / 2,
+            text,
+            {
+                fontFamily: 'Arial',
+                fontSize: '28px',
+                color: '#ff0000',
+                backgroundColor: '#333333',
+                padding: { left: 20, right: 20, top: 10, bottom: 10 },
+                stroke: '#000000',
+                strokeThickness: 2
+            }
+        )
+        .setOrigin(0.5)
+        .setDepth(100) // Устанавливаем высокий depth чтобы было поверх других элементов
+        .setName('statusMessage'); // Даем имя для последующего поиска
+
+        // Анимация появления
+        message.setAlpha(0);
+        this.tweens.add({
+            targets: message,
+            alpha: 1,
+            duration: 300,
+            ease: 'Linear'
+        });
+
+        // Автоматическое исчезновение через 2 секунды с анимацией
+        this.time.delayedCall(2000, () => {
+            this.tweens.add({
+                targets: message,
+                alpha: 0,
+                duration: 500,
+                ease: 'Linear',
+                onComplete: () => message.destroy()
+            });
+        });
     }
 
     private createMenuItem(y: number, text: string, color: string, action: () => void): Phaser.GameObjects.Text {
@@ -142,13 +196,17 @@ export class GameOver extends Phaser.Scene {
     }
 
     update(time: number) {
-        if (!this.menuInput) return;
+        if (!this.menuInput || this.isInputSceneActive()) return;
 
         this.menuInput.update();
 
         this.handleNavigation(time);
         this.handleSelection();
-        this.handleTrirdAction();
+        this.handleThirdAction();
+    }
+
+    private isInputSceneActive(): boolean {
+        return this.scene.isActive('InputScene');
     }
 
     private handleNavigation(time: number) {
@@ -175,7 +233,7 @@ export class GameOver extends Phaser.Scene {
         }
     }
 
-    private handleTrirdAction() {
+    private handleThirdAction() {
         if (this.menuInput.thirdActionIsDown) {
             this.registry.get('onRestart')();
         }
@@ -189,7 +247,12 @@ export class GameOver extends Phaser.Scene {
     }
 
     shutdown() {
-        this.menuInput.cleanup();
+        const message = this.children.getByName('statusMessage');
+        if (message) {
+            message.destroy();
+        }
+
+        this.menuInput?.cleanup();
         this.input.off('pointermove');
     }
 }

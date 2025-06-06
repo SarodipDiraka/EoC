@@ -9,6 +9,7 @@ import { LevelCompleteScene } from './scenes/level-complete-scene';
 import { VictoryScene } from './scenes/victory-scene';
 import { OptionsScene } from './scenes/options-scene';
 import { RecordsScene } from './scenes/records-scene';
+import { InputScene } from './scenes/input-scene';
 
 const config: Phaser.Types.Core.GameConfig = {
     type: AUTO,
@@ -21,6 +22,11 @@ const config: Phaser.Types.Core.GameConfig = {
         mode: Phaser.Scale.HEIGHT_CONTROLS_WIDTH,
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
+    fps: {
+        target: 60,  // Стандарт для плавного движения пуль
+        forceSetTimeOut: true,  // Стабильность в браузерах
+        smoothStep: false,  // Лучше отключить для точного хит-детектинга
+    },
     backgroundColor: '#000000',
     physics: {
         default: 'arcade',
@@ -29,7 +35,7 @@ const config: Phaser.Types.Core.GameConfig = {
             debug: false
         }
     },
-    scene: [BootScene, PreloadScene, MainMenu, GameScene, PauseMenu, GameOver, LevelCompleteScene, VictoryScene, RecordsScene, OptionsScene ]
+    scene: [BootScene, PreloadScene, MainMenu, GameScene, PauseMenu, GameOver, LevelCompleteScene, VictoryScene, RecordsScene, OptionsScene, InputScene ]
 };
 
 const StartGame = (parent: string) => {

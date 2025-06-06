@@ -76,6 +76,7 @@ export interface SpawnerConfig {
 export interface WaveConfig {
     duration: number;
     delayAfter: number;
+    initialDelay?: number;
     spawners: SpawnerConfig[];
 }
 

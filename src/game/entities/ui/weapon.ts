@@ -55,7 +55,6 @@ export class Weapons extends Phaser.GameObjects.Container {
     }
 
     private updateWeaponType(type: number): void {
-        console.log(type);
         let typeChar = 'W';
         switch(type) {
             case 2: typeChar = 'L'; break;

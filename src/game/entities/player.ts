@@ -49,7 +49,7 @@ export class Player extends Phaser.GameObjects.Container {
         if(this.body instanceof Phaser.Physics.Arcade.Body)
         {
             this.body.setSize(4, 4); //его размер
-            // this.body.setOffset(-12, -12); //его смещение
+            this.body.setOffset(-1.9, 0); //его смещение
             this.body.setCollideWorldBounds(true); //столкновение со стенами сцены
             this.setDepth(2); //Выше глубина - отрисовывается выше объектов с меньшей глубиной
         }

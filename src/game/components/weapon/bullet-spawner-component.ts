@@ -1,5 +1,9 @@
 import Phaser from 'phaser';
 
+export interface BulletBehavior {
+    update(bullet: Phaser.Physics.Arcade.Sprite, delta: number): void;
+}
+
 export interface BulletSpawnConfig {
     directions: Phaser.Math.Vector2[];
     speed: number;
@@ -9,6 +13,7 @@ export interface BulletSpawnConfig {
     animationKey?: string;
     flipY?: boolean;
     spawnPosition?: { x: number; y: number };
+    behaviors?: BulletBehavior[];
 }
 
 export class BulletSpawnerComponent {
@@ -59,6 +64,12 @@ export class BulletSpawnerComponent {
                 bullet.disableBody(true, true);
                 this.activeBullets.delete(bullet);
             }
+
+            // Применение поведения пуль
+            const behaviors = bullet.getData('behaviors') as BulletBehavior[];
+            if (behaviors) {
+                behaviors.forEach(behavior => behavior.update(bullet, delta));
+            }
         });
     }
 
@@ -81,6 +92,12 @@ export class BulletSpawnerComponent {
             if (config.animationKey) bullet.play(config.animationKey);
             if (config.flipY) bullet.setFlipY(true);
 
+            // Поведение пули
+            if (config.behaviors) {
+                bullet.setData('behaviors', config.behaviors);
+            }
+            else bullet.setData('behaviors', null);
+
             if (bullet.body) {
                 bullet.body.velocity.x = direction.x * config.speed;
                 bullet.body.velocity.y = direction.y * config.speed;
@@ -92,6 +109,7 @@ export class BulletSpawnerComponent {
 
     destroyBullet(bullet: Phaser.Physics.Arcade.Sprite): void {
         if (bullet.active) {
+            bullet.setData('behaviors', null);
             bullet.disableBody(true, true);
             this.activeBullets.delete(bullet);
         }
@@ -99,6 +117,7 @@ export class BulletSpawnerComponent {
 
     bulletClear(): void {
         this.activeBullets.forEach(bullet => {
+            bullet.setData('behaviors', null);
             this.destroyBullet(bullet);
         });
     }

@@ -3,6 +3,7 @@ import { EventBus } from '../event-bus';
 import { MenuInputComponent } from '../components/input/human/menu-input-component';
 import * as CONFIG from '../configs/game-config';
 import { CUSTOM_EVENTS } from '../types/custom-events';
+import { LocalStorageManager } from '../managers/local-storage-manager';
 
 export class VictoryScene extends Phaser.Scene {
     private menuInput!: MenuInputComponent;
@@ -115,7 +116,7 @@ export class VictoryScene extends Phaser.Scene {
         // Титры
         const credits = [
             'GAME CREATED BY',
-            'HIDEO KOJIMA',
+            'Acaride',
             '',
             'SPECIAL THANKS TO',
             'Phaser 3 Framework',
@@ -184,7 +185,14 @@ export class VictoryScene extends Phaser.Scene {
 
         // Пункты меню
         const saveItem = this.createMenuItem(350, 'SAVE RESULT', () => {
-            console.log('Save result pressed');
+            if (LocalStorageManager.isScoreInTop(this.finalScore)) {
+                this.scene.launch('InputScene', { 
+                    score: this.finalScore, 
+                    level: 'All'
+                });
+            } else {
+                this.showMessage('Score too low for top 10');
+            }
         });
 
         const menuItem = this.createMenuItem(450, 'MAIN MENU', () => {
@@ -226,6 +234,53 @@ export class VictoryScene extends Phaser.Scene {
         return menuItem;
     }
 
+    private showMessage(text: string) {
+        // Удаляем предыдущее сообщение, если оно есть
+        const existingMessage = this.children.getByName('statusMessage');
+        if (existingMessage) {
+            existingMessage.destroy();
+        }
+
+        // Создаем новое сообщение с именем для последующего удаления
+        const message = this.add.text(
+            this.cameras.main.width / 2,
+            this.cameras.main.height / 2,
+            text,
+            {
+                fontFamily: 'Arial',
+                fontSize: '28px',
+                color: '#ff0000',
+                backgroundColor: '#333333',
+                padding: { left: 20, right: 20, top: 10, bottom: 10 },
+                stroke: '#000000',
+                strokeThickness: 2
+            }
+        )
+        .setOrigin(0.5)
+        .setDepth(100) // Устанавливаем высокий depth чтобы было поверх других элементов
+        .setName('statusMessage'); // Даем имя для последующего поиска
+
+        // Анимация появления
+        message.setAlpha(0);
+        this.tweens.add({
+            targets: message,
+            alpha: 1,
+            duration: 300,
+            ease: 'Linear'
+        });
+
+        // Автоматическое исчезновение через 2 секунды с анимацией
+        this.time.delayedCall(2000, () => {
+            this.tweens.add({
+                targets: message,
+                alpha: 0,
+                duration: 500,
+                ease: 'Linear',
+                onComplete: () => message.destroy()
+            });
+        });
+    }
+
     private clearCurrentDisplay() {
         // Удаляем все объекты из текущей группы отображения
         this.currentDisplayGroup.clear(true, true);
@@ -257,11 +312,15 @@ export class VictoryScene extends Phaser.Scene {
     }
 
     update(time: number) {
-        if (!this.menuInput) return;
+        if (!this.menuInput || this.isInputSceneActive()) return;
 
         this.menuInput.update();
         this.handleNavigation(time);
         this.handleSelection();
+    }
+
+    private isInputSceneActive(): boolean {
+        return this.scene.isActive('InputScene');
     }
 
     private handleNavigation(time: number) {
@@ -296,6 +355,11 @@ export class VictoryScene extends Phaser.Scene {
     }
 
     shutdown() {
+        const message = this.children.getByName('statusMessage');
+        if (message) {
+            message.destroy();
+        }
+
         this.clearCurrentDisplay();
         if (this.overlay) {
             this.overlay.destroy();

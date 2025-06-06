@@ -121,6 +121,7 @@ export class GameScene extends Phaser.Scene {
         EventBus.on(CUSTOM_EVENTS.RESTART_GAME, this.restartGame, this);
         EventBus.on(CUSTOM_EVENTS.CONTINUE_GAME, this.continueGame, this);
         EventBus.on(CUSTOM_EVENTS.CLEANUP_GAME, this.cleanup, this)
+        EventBus.on(CUSTOM_EVENTS.MAIM_MENU_FROM_GAME_OVER, this.returnToMainMenu, this)
     }
 
     private initGameSystems(): void {
@@ -137,13 +138,14 @@ export class GameScene extends Phaser.Scene {
 
     private startLevel = () => {
         console.log(`[GameScene] Starting level ${this.currentLevel + 1}`);
+        this.registry.set('currentLevel', this.currentLevel + 1);
         this.levelManager.startLevel(this.currentLevel);
     };
 
     private handleLevelComplete = (data: { level: number }) => {
         if (data.level + 1 < this.levelManager.levelsCount) {
 
-            this.time.delayedCall(3000, () => {
+            this.time.delayedCall(5000, () => {
                 // Переход на следующий уровень
                 this.scene.launch('LevelComplete', {
                     level: data.level,
@@ -363,12 +365,10 @@ export class GameScene extends Phaser.Scene {
 
         if (this.scoreSystem) {
             this.scoreSystem.destroy();
-            this.scoreSystem = new Score(this, EventBus);
         }
 
         if (this.livesSystem) {
             this.livesSystem.destroy();
-            this.livesSystem = new Lives(this, EventBus);
         }
 
         this.backgrounds.forEach(bg => bg.destroy());

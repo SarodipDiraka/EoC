@@ -5,10 +5,11 @@ const level2: LevelConfig = {
         {
             duration: 40000,
             delayAfter: 4000,
+            initialDelay: 8000,
             spawners: [
                 {
                     enemyType: "scout",
-                    interval: 30000,
+                    interval: 10000,
                     groupSize: 20,
                     patternType: "spiral",
                     patternParams: {

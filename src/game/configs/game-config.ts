@@ -3,7 +3,7 @@ import level1 from "./levels/level-1.config";
 import level2 from "./levels/level-2.config";
 
 // Настройки игрока
-export const PLAYER_LIVES: number = 3;
+export const PLAYER_LIVES: number = 1;
 export const PLAYER_HEALTH: number = 1;
 export const PLAYER_MOVEMENT_VELOCITY: number = 250;
 export const LIFE_BONUS_VALUE = 1000; // Бонус за каждую оставшуюся жизнь
@@ -97,7 +97,7 @@ export const PLAYER_WEAPON_CONFIG: PlayerWeaponConfig = {
         },
         homing: {
             bulletCount: [2, 4, 6, 8], // Количество наводящихся пуль по уровням
-            texture: 'bullet',
+            texture: 'rocket',
             speed: 300,
             turnRate: 0.08, // Скорость поворота (радианы за кадр)
             delayBeforeHoming: 100, // Начинает наводиться

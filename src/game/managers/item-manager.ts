@@ -26,7 +26,7 @@ export class ItemManager {
         
         this.itemsGroup = this.scene.physics.add.group({
             classType: Phaser.GameObjects.Sprite,
-            maxSize: 20,
+            maxSize: 40, //максимум обрабатываемых предметов на экране
             runChildUpdate: true // Важно: для автоматического вызова update у предметов
         });
         
@@ -64,7 +64,7 @@ export class ItemManager {
     // Метод для очистки всех предметов
     public clearAllItems(): void {
         if (!this.itemsGroup || this.itemsGroup.scene?.scene.isPaused()) return;
-        const children = this.itemsGroup.getChildren().slice();
+        const children = this.itemsGroup?.getChildren().slice();
         children.forEach(child => {
             if (child instanceof Phaser.GameObjects.GameObject) {
                 child.destroy(true);

@@ -38,7 +38,7 @@ export class LocalStorageManager {
     // Загрузка таблицы рекордов
     static loadHighScores(): HighScoreRecord[] {
         const defaultHighScores: HighScoreRecord[] = Array(10).fill(null).map((_, i) => ({
-            name: `Player ${10 - i}`,
+            name: `NoEntry`,
             score: (10 - i) * 1000,
             level: (10 - i) >= 3 ? 'All' : (10 - i) as number,
             date: new Date(Date.now() - (i * 86400000)).toISOString()
@@ -81,5 +81,10 @@ export class LocalStorageManager {
             
         this.saveHighScores(updatedRecords);
         return updatedRecords;
+    }
+
+    static isScoreInTop(score: number): boolean {
+        const records = this.loadHighScores();
+        return records.length < 10 || score > records[records.length - 1].score;
     }
 }

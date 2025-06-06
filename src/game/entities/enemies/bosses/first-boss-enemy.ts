@@ -1,6 +1,7 @@
 import { EventBusComponent } from '@/game/components/events/event-bus-component';
 import { BulletSpawnerComponent } from '@/game/components/weapon/bullet-spawner-component';
 import { BossEnemy } from './base-boss';
+import { SinWaveBehavior, AcceleratingBehavior, HomingBehavior, DirectionChangeBehavior } from '@/game/components/weapon/bullet-behaviors';
 
 export class FirstBoss extends BossEnemy {
     private lastShootTime = 0;
@@ -11,6 +12,10 @@ export class FirstBoss extends BossEnemy {
     private _lineOffset: number;
     private _shipSprite!: Phaser.GameObjects.Sprite;
     private _engineSprite!: Phaser.GameObjects.Sprite;
+
+    private _spiralAngle: number = 0;
+    private _splitTimer: number = 0;
+    private _homingTimer: number = 0;
 
     // Размеры хитбокса (ширина, высота)
     private hitboxWidth: number = 48;
@@ -31,6 +36,156 @@ export class FirstBoss extends BossEnemy {
 
     protected createPhases() {
         return [
+            // // Фаза 1: Синусоидальные волны
+            // {
+            //     health: 1000,
+            //     duration: 15000,
+            //     onEnter: () => {
+            //         this.fireInterval = 200;
+            //         this._movementSpeed = 120;
+            //     },
+            //     update: (time: number, delta: number) => {
+            //         if (time - this.lastShootTime >= this.fireInterval) {
+            //             this.lastShootTime = time;
+                        
+            //             const directions = [
+            //                 new Phaser.Math.Vector2(0, 1),
+            //                 new Phaser.Math.Vector2(0.5, 0.8),
+            //                 new Phaser.Math.Vector2(-0.5, 0.8)
+            //             ];
+                        
+            //             this.bulletSpawner.spawn({
+            //                 directions,
+            //                 speed: 300,
+            //                 lifespan: 5000,
+            //                 animationKey: 'bullet',
+            //                 behaviors: [
+            //                     new SinWaveBehavior(0.005, 0.15, 90),
+            //                 ]
+            //             });
+            //         }
+            //     }
+            // },
+
+            // // Фаза 2: Ускоряющиеся спирали
+            // {
+            //     health: 1200,
+            //     duration: 15000,
+            //     onEnter: () => {
+            //         this.fireInterval = 300;
+            //         this._movementSpeed = 150;
+            //         this._spiralAngle = 0;
+            //     },
+            //     update: (time: number, delta: number) => {
+            //         if (time - this.lastShootTime < this.fireInterval) return;
+            //         this.lastShootTime = time;
+
+            //         const spiralArms = 4;
+            //         const bulletsPerArm = 3;
+                    
+            //         for (let arm = 0; arm < spiralArms; arm++) {
+            //             const angleOffset = arm * (2 * Math.PI / spiralArms);
+            //             this._spiralAngle += 0.1;
+                        
+            //             for (let bulletNum = 0; bulletNum < bulletsPerArm; bulletNum++) {
+            //                 const angle = angleOffset + this._spiralAngle + bulletNum * 0.3;
+            //                 const direction = new Phaser.Math.Vector2(
+            //                     Math.cos(angle),
+            //                     Math.sin(angle)
+            //                 );
+
+            //                 this.bulletSpawner.spawn({
+            //                     directions: [direction],
+            //                     speed: 150 + bulletNum * 30,
+            //                     lifespan: 3500,
+            //                     animationKey: 'bullet',
+            //                     behaviors: [
+            //                         new AcceleratingBehavior(80 + bulletNum * 15),
+
+            //                     ]
+            //                 });
+            //             }
+            //         }
+            //     }
+            // },
+
+            // Фаза 3: Самонаводящиеся пули с задержкой
+            // {
+            //     health: 1500,
+            //     duration: 20000,
+            //     onEnter: () => {
+            //         this.fireInterval = 700;
+            //         this._movementSpeed = 180;
+            //     },
+            //     update: (time: number, delta: number) => {
+            //         if (time - this.lastShootTime < this.fireInterval) return;
+            //         this.lastShootTime = time;
+
+            //         const circleCount = 12;
+            //         for (let i = 0; i < circleCount; i++) {
+            //             const angle = Phaser.Math.DegToRad(i * (360 / circleCount));
+            //             const direction = new Phaser.Math.Vector2(
+            //                 Math.cos(angle),
+            //                 Math.sin(angle)
+            //             );
+
+            //             this.bulletSpawner.spawn({
+            //                 directions: [direction],
+            //                 speed: 150,
+            //                 lifespan: 5000,
+            //                 animationKey: 'bullet',
+            //                 behaviors: [
+            //                     new HomingBehavior(
+            //                         0.08,
+            //                         () => this.scene.registry.get('player'),
+            //                         i * 300,
+            //                         1500 // Длительность наведения 1.5 сек
+            //                     ),
+            //                     new AcceleratingBehavior(40)
+            //                 ]
+            //             });
+            //         }
+            //     }
+            // },
+
+            // // Фаза 4: Пули с резкой сменой направления
+            // {
+            //     health: 1800,
+            //     duration: 20000,
+            //     onEnter: () => {
+            //         this.fireInterval = 500;
+            //         this._movementSpeed = 200;
+            //     },
+            //     update: (time: number, delta: number) => {
+            //         if (time - this.lastShootTime < this.fireInterval) return;
+            //         this.lastShootTime = time;
+
+            //         // Создаем 12 направлений в веере
+            //         const directions = Array.from({length: 12}, (_, i) => {
+            //             const angle = Phaser.Math.DegToRad(i * 30 - 75); // От -75° до +75°
+            //             return new Phaser.Math.Vector2(
+            //                 Math.cos(angle),
+            //                 Math.sin(angle)
+            //             );
+            //         });
+
+            //         this.bulletSpawner.spawn({
+            //             directions,
+            //             speed: 300, // Высокая начальная скорость
+            //             lifespan: 3000,
+            //             animationKey: 'bullet',
+            //             behaviors: [
+            //                 new DirectionChangeBehavior(
+            //                     1000, // Через 1 сек
+            //                     Math.PI // Разворот на 180°
+            //                 ),
+            //                 new AcceleratingBehavior(50)
+            //             ]
+            //         });
+            //     }
+            // },
+
+            
             {
                 health: 1000,
                 duration: 30000,
@@ -278,7 +433,7 @@ export class FirstBoss extends BossEnemy {
     destroy(fromScene?: boolean): void {
         this._engineSprite.destroy(fromScene);
         super.destroy(fromScene);
-        this.bulletSpawner.bulletClear();
+        this.bulletSpawner?.bulletClear();
     }
 
     get shipAssetKey(): string { return  'fighter'; }

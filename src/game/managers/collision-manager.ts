@@ -171,7 +171,7 @@ export class CollisionManager {
                     const player = playerObj as Player;
                     const boss = bossObj as BossEnemy;
                     
-                    if (!boss.healthComponent.isDead) {
+                    if (!boss.healthComponent.isDead && !player.isInvulnerable) {
                         player.collider.collideWithEnemyShip();
                     }
                 }
@@ -379,19 +379,28 @@ export class CollisionManager {
                     );
                 }
                 else{
-                    const angle = Phaser.Math.Angle.Between(
+                    const angleToTop = Phaser.Math.Angle.Between(
                         sprite.x, sprite.y,
                         sprite.x, -100
                     );
-                            
-                    const currentAngle = sprite.rotation;
-                    const newAngle = Phaser.Math.Angle.RotateTo(currentAngle, angle, homingData.turnRate);
-                            
-                    sprite.setRotation(newAngle);
-                    sprite.body?.velocity.set(
-                        Math.cos(newAngle) * homingData.speed,
-                        Math.sin(newAngle) * homingData.speed
+                    
+                    const currentMoveAngle = Math.atan2(
+                        (sprite.body as Phaser.Physics.Arcade.Body).velocity.y,
+                        (sprite.body as Phaser.Physics.Arcade.Body).velocity.x
                     );
+                    
+                    const newMoveAngle = Phaser.Math.Angle.RotateTo(
+                        currentMoveAngle, 
+                        angleToTop, 
+                        homingData.turnRate
+                    );
+                    
+                    sprite.body?.velocity.set(
+                        Math.cos(newMoveAngle) * homingData.speed,
+                        Math.sin(newMoveAngle) * homingData.speed
+                    );
+                    
+                    sprite.setRotation(newMoveAngle + Math.PI/2);
                 }
             }
         });
@@ -459,19 +468,32 @@ export class CollisionManager {
         turnRate: number,
         speed: number
     ): void {
-        const angle = Phaser.Math.Angle.Between(
+        const angleToTarget = Phaser.Math.Angle.Between(
             bullet.x, bullet.y,
             target.x, target.y
         );
         
-        const currentAngle = bullet.rotation;
-        const newAngle = Phaser.Math.Angle.RotateTo(currentAngle, angle, turnRate);
-        
-        bullet.setRotation(newAngle);
-        bullet.body?.velocity.set(
-            Math.cos(newAngle) * speed,
-            Math.sin(newAngle) * speed
+        // Текущий угол движения пули (не спрайта!)
+        const currentMoveAngle = Math.atan2(
+            (bullet.body as Phaser.Physics.Arcade.Body).velocity.y,
+            (bullet.body as Phaser.Physics.Arcade.Body).velocity.x
         );
+        
+        // Плавный поворот к цели
+        const newMoveAngle = Phaser.Math.Angle.RotateTo(
+            currentMoveAngle, 
+            angleToTarget, 
+            turnRate
+        );
+        
+        // Обновляем velocity
+        (bullet.body as Phaser.Physics.Arcade.Body).velocity.set(
+            Math.cos(newMoveAngle) * speed,
+            Math.sin(newMoveAngle) * speed
+        );
+        
+        // Поворачиваем спрайт в направлении движения
+        bullet.setRotation(newMoveAngle + Math.PI/2); // +90° для правильной ориентации
     }
 
     cleanup(): void {

@@ -70,6 +70,7 @@ export abstract class BaseEnemy extends Phaser.GameObjects.Container {
     }
 
     destroy(fromScene?: boolean): void {
+        this.bulletSpawner?.bulletClear();
         this.scene.events.off(Phaser.Scenes.Events.UPDATE, this.update, this);
         super.destroy(fromScene);
     }
@@ -94,6 +95,7 @@ export abstract class BaseEnemy extends Phaser.GameObjects.Container {
     }
 
     protected handleDeath(): void {
+        this.bulletSpawner?.bulletClear();
         this.setActive(false).setVisible(false);
         if (this.body && this.body instanceof Phaser.Physics.Arcade.Body) {
             this.body.enable = false;

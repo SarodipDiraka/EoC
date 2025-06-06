@@ -80,6 +80,26 @@
     ]
   },
   {
+    "path": "assets/images/Master484",
+    "files": [
+      {
+        "type": "image",
+        "key": "rocket",
+        "url": "rocket.png"
+      },
+      {
+        "type": "image",
+        "key": "red_rice",
+        "url": "red_rice.png"
+      },
+      {
+        "type": "image",
+        "key": "purple_rice",
+        "url": "purple_rice.png"
+      }
+    ]
+  },
+  {
     "path": "assets/audio/ansimuz",
     "files": [
       {

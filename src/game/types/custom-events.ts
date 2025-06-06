@@ -18,6 +18,7 @@ export const CUSTOM_EVENTS = Object.freeze({
     BOMB_COUNT_CHANGED: 'bomb-count-changed',
     POWER_CHANGED: 'power-changed',
     SETTINGS_CHANGED: 'SETTINGS_CHANGED',
+    MAIM_MENU_FROM_GAME_OVER: 'main-menu-from-game-over',
 
     ADD_POWER: 'add-power',
     ADD_SCORE: 'add-score',

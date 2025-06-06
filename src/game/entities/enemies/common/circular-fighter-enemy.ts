@@ -52,7 +52,7 @@ export class CircularFighterEnemy extends BaseEnemy {
         this._bulletSpawner = new BulletSpawnerComponent(
             this.scene,
             this,
-            'bullet',
+            'red_rice',
             100
         );
 
@@ -196,10 +196,9 @@ export class CircularFighterEnemy extends BaseEnemy {
             directions: [mainDirection, leftDirection, rightDirection],
             speed: CONFIG.CIRCULAR_FIGHTER_BULLET_SPEED,
             lifespan: CONFIG.CIRCULAR_FIGHTER_BULLET_LIFESPAN,
-            size: { width: 14, height: 18 },
-            animationKey: 'bullet',
+            size: { width: 6, height: 10 },
             flipY: true,
-            scale: 0.8,
+            scale: 1.1,
             spawnPosition: { 
                 x: this.x, 
                 y: this.y + 10

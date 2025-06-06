@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { EventBus } from '../event-bus';
-import { LevelConfig  } from '../types/interfaces';
+import { LevelConfig, SpawnerConfig, WaveConfig  } from '../types/interfaces';
 import { CUSTOM_EVENTS } from '../types/custom-events';
 import { BossEnemy } from '../entities/enemies/bosses/base-boss';
 import { FirstBoss } from '../entities/enemies/bosses/first-boss-enemy';
@@ -16,12 +16,15 @@ export class LevelManager {
     private currentBoss?: BossEnemy | null;
     private playerRef?: Player;
     private bossUI?: BossUI;
+    private enemiesAlive = 0;
+    private waveConfig?: WaveConfig;
     public levelsCount: number;
+    private hasLimitedSpawners: boolean = false;
 
     constructor(scene: Phaser.Scene, levels: LevelConfig[]) {
         this.scene = scene;
         this.levels = levels;
-        this.levelsCount = levels.length
+        this.levelsCount = levels.length;
         this.setupEventListeners();
         scene.events.once(Phaser.Scenes.Events.CREATE, () => {
             this.playerRef = scene.registry.get('player');
@@ -36,22 +39,71 @@ export class LevelManager {
     }
 
     private startWave() {
-        EventBus.emit(CUSTOM_EVENTS.RESET_ALL_SPAWNERS);
+        this.waveConfig = this.levels[this.currentLevel].waves[this.currentWave];
+        const initialDelay = this.waveConfig.initialDelay || 0;
         
-        const waveConfig = this.levels[this.currentLevel].waves[this.currentWave];
+        if (initialDelay > 0) {
+            this.scene.time.delayedCall(initialDelay, () => {
+                this.startWaveImmediately();
+            });
+        } else {
+            this.startWaveImmediately();
+        }
+    }
+
+    private startWaveImmediately() {
+        EventBus.emit(CUSTOM_EVENTS.RESET_ALL_SPAWNERS);
+        this.waveConfig = this.levels[this.currentLevel].waves[this.currentWave];
+        
+        this.enemiesAlive = 0;
+        
+        // Проверяем, есть ли спавнеры с ограниченным количеством врагов
+        this.hasLimitedSpawners = this.waveConfig.spawners.some(
+            (spawner: SpawnerConfig) => spawner.count !== undefined
+        );
         
         console.log(`Starting wave ${this.currentWave + 1} of level ${this.currentLevel + 1}`);
 
-        waveConfig.spawners.forEach(spawnerConfig => {
+        // Подписываемся на события создания и уничтожения врагов
+        EventBus.on(CUSTOM_EVENTS.ENEMY_INIT, this.onEnemySpawned, this);
+        EventBus.on(CUSTOM_EVENTS.ENEMY_DESTROYED, this.onEnemyDestroyed, this);
+
+        this.waveConfig.spawners.forEach((spawnerConfig: SpawnerConfig) => {
             EventBus.emit(CUSTOM_EVENTS.START_SPAWNER, spawnerConfig);
         });
 
-        this.waveTimer = this.scene.time.delayedCall(waveConfig.duration, () => {
-            this.endWave(waveConfig.delayAfter);
+        this.waveTimer = this.scene.time.delayedCall(this.waveConfig.duration, () => {
+            this.endWave(this.waveConfig!.delayAfter);
         });
     }
 
+    private onEnemySpawned() {
+        this.enemiesAlive++;
+    }
+
+    private onEnemyDestroyed() {
+        this.enemiesAlive--;
+        
+        // Для волн с ограниченным количеством врагов проверяем завершение
+        if (this.hasLimitedSpawners && this.enemiesAlive <= 0) {
+            this.earlyWaveCompletion();
+        }
+    }
+
+    private earlyWaveCompletion() {
+        // Отменяем текущий таймер волны, если он есть
+        if (this.waveTimer) {
+            this.waveTimer.destroy();
+        }
+        // Завершаем волну досрочно
+        this.endWave(this.waveConfig!.delayAfter);
+    }
+
     private endWave(delayAfter: number) {
+        // Отписываемся от событий врагов
+        EventBus.off(CUSTOM_EVENTS.ENEMY_INIT, this.onEnemySpawned, this);
+        EventBus.off(CUSTOM_EVENTS.ENEMY_DESTROYED, this.onEnemyDestroyed, this);
+
         EventBus.emit(CUSTOM_EVENTS.STOP_ALL_SPAWNERS);
 
         if (this.currentWave < this.levels[this.currentLevel].waves.length - 1) {
@@ -63,6 +115,7 @@ export class LevelManager {
     }
 
     private startBossFight() {
+        EventBus.emit(CUSTOM_EVENTS.RESET_ALL_SPAWNERS);
         const bossConfig = this.levels[this.currentLevel].boss;
         if (!bossConfig) {
             this.levelComplete();

@@ -83,8 +83,6 @@ export class AudioManager {
             });
         });
 
-        console.log(`Not Music`);
-        console.log(this.currentSettings.sfxVolume);
 
         // Создание пулов для SFX с учетом текущих настроек
         Object.entries(this.config.sfx).forEach(([key, cfg]) => {
@@ -122,9 +120,6 @@ export class AudioManager {
         
         if (!pool || !config) return false;
 
-        console.log(`Not Music`);
-        console.log(this.currentSettings.sfxVolume);
-
         if (config.overlap) {
             const availableSound = pool.find(s => !(s as Phaser.Sound.WebAudioSound).isPlaying);
             if (availableSound) {
@@ -157,9 +152,6 @@ export class AudioManager {
             console.error(`Music ${key} not configured`);
             return;
         }
-
-        console.log(`Music`);
-        console.log(this.currentSettings.musicVolume);
 
         this.stopMusic();
         this.currentMusic = this.scene.sound.add(key, {
