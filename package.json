@@ -5,7 +5,7 @@
     "scripts": {
         "dev": "next dev -p 8080",
         "build": "next build",
-        "export": "cross-env EXPORT_MODE=true next build && rimraf docs/EoC && cpx \"out/**/*\" docs/EoC"
+        "export": "cross-env EXPORT_MODE=true next build && rimraf docs && cpx \"out/**/*\" docs"
     },
     "dependencies": {
         "@supabase/supabase-js": "^2.49.4",
