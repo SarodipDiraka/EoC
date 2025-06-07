@@ -7,6 +7,8 @@ const nextConfig = {
   output: isExportMode ? 'export' : 'standalone',
 
   trailingSlash: isExportMode,
+  assetPrefix: isExportMode ? `/${repoName}/` : undefined,
+  basePath: isExportMode ? `/${repoName}` : undefined,
 
   typescript: {
     ignoreBuildErrors: true
