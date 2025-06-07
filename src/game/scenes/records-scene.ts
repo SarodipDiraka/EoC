@@ -3,6 +3,7 @@ import { MenuInputComponent } from '../components/input/human/menu-input-compone
 import { LocalStorageManager } from '../managers/local-storage-manager';
 import { EventBus } from '../event-bus';
 import { HighScoreRecord } from '../types/interfaces';
+import { RemoteStorageManager } from '../managers/remote-storage-manager';
 
 export class RecordsScene extends Phaser.Scene {
     private menuInput!: MenuInputComponent;
@@ -12,7 +13,7 @@ export class RecordsScene extends Phaser.Scene {
     private selectedButtonIndex: number = 0;
     private buttons: Phaser.GameObjects.Text[] = [];
     private lastInputTime = 0;
-private inputDelay = 200;
+    private inputDelay = 200;
 
     constructor() {
         super('RecordsScene');
@@ -192,13 +193,26 @@ private inputDelay = 200;
         this.updateButtonSelection();
     }
 
-    private resetHighScores() {
+    private async resetHighScores() {
         LocalStorageManager.saveHighScores(LocalStorageManager.loadHighScores().map((_, i) => ({
             name: `NoEntry`,
             score: (10 - i) * 1000,
             level: (10 - i) >= 3 ? 'All' : (10 - i) as number,
             date: new Date(Date.now() - (i * 86400000)).toISOString()
         })));
+
+        if (RemoteStorageManager.isSyncEnabled()) {
+            try {
+                await RemoteStorageManager.clearHighScores();
+                const localScores = LocalStorageManager.loadHighScores();
+                for (const score of localScores) {
+                    await RemoteStorageManager.addHighScore(score);
+                }
+            } catch (error) {
+                console.error('Ошибка при очистке серверных рекордов', error);
+                return;
+            }
+        }
         
         this.createRecordsDisplay(LocalStorageManager.loadHighScores());
         this.showMessage('Scores reset to default');

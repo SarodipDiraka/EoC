@@ -22,3 +22,8 @@ export default function Home() {
         </>
     );
 }
+
+// Это нужно для статического экспорта
+export async function getStaticProps() {
+  return { props: {} };
+}

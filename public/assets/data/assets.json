@@ -128,5 +128,20 @@
         "url": "space_asteroids.wav"
       }
     ]
+  },
+  {
+    "path": "assets/html",
+    "files": [
+      {
+        "type": "html",
+        "key": "loginForm",
+        "url": "loginForm.html"
+      },
+      {
+        "type": "html",
+        "key": "registerForm",
+        "url": "registerForm.html"
+      }
+    ]
   }
 ]

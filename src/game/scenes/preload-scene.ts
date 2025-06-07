@@ -32,7 +32,6 @@ export class PreloadScene extends Phaser.Scene {
     create(): void {
         EventBus.emit('current-scene-ready', this);
         this.createAnimations();
-        this.scene.start('MainMenu');
     }
 
     private createLoadingVisuals(): void {
@@ -69,6 +68,7 @@ export class PreloadScene extends Phaser.Scene {
     private onLoadComplete = (): void => {
         this.loadingBar.destroy();
         this.progressBar.destroy();
+        this.scene.start('MainMenu');
     };
 
     private createAnimations(): void {

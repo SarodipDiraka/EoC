@@ -10,6 +10,8 @@ import { VictoryScene } from './scenes/victory-scene';
 import { OptionsScene } from './scenes/options-scene';
 import { RecordsScene } from './scenes/records-scene';
 import { InputScene } from './scenes/input-scene';
+import { AuthScene } from './scenes/auth-scene';
+import { LeaderboardScene } from './scenes/LeaderboardScene';
 
 const config: Phaser.Types.Core.GameConfig = {
     type: AUTO,
@@ -35,7 +37,10 @@ const config: Phaser.Types.Core.GameConfig = {
             debug: false
         }
     },
-    scene: [BootScene, PreloadScene, MainMenu, GameScene, PauseMenu, GameOver, LevelCompleteScene, VictoryScene, RecordsScene, OptionsScene, InputScene ]
+    scene: [BootScene, PreloadScene, MainMenu, GameScene, PauseMenu, GameOver, LevelCompleteScene, VictoryScene, RecordsScene, OptionsScene, InputScene, AuthScene, LeaderboardScene ],
+    dom: {
+        createContainer: true
+    },
 };
 
 const StartGame = (parent: string) => {

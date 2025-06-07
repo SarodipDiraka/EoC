@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { EventBus } from '../event-bus';
 import { MenuInputComponent } from '../components/input/human/menu-input-component';
+import { RemoteStorageManager } from '../managers/remote-storage-manager';
 
 export class MainMenu extends Phaser.Scene {
     private menuInput!: MenuInputComponent;
@@ -14,7 +15,7 @@ export class MainMenu extends Phaser.Scene {
         super('MainMenu');
     }
 
-    create() {
+    async create() {
         // Сохраняем выбранный индекс при перезаходе
         this.selectedItemIndex = this.registry.get('selectedMenuItemIndex') || 0;
         
@@ -39,34 +40,54 @@ export class MainMenu extends Phaser.Scene {
 
     private createTitle() {
         this.title = this.add.text(
-            this.cameras.main.width / 2, 
-            150, 
-            'End of Course', 
-            { 
-                fontFamily: 'Arial', 
-                fontSize: '48px', 
-                color: '#ffffff',
+            this.cameras.main.width / 2,
+            100,
+            'End of Course',
+            {
+                fontFamily: 'Arial',
+                fontSize: '48px',
+                color: '#00ffff',
                 stroke: '#000000',
-                strokeThickness: 4
+                strokeThickness: 4,
+                shadow: {
+                    offsetX: 0,
+                    offsetY: 0,
+                    color: '#00ffff',
+                    blur: 8,
+                    stroke: true,
+                    fill: true
+                }
             }
         ).setOrigin(0.5);
     }
 
-    private createMenuItems() {
+
+    private async createMenuItems() {
         this.menuItems = [
-            this.createMenuItem(300, 'Game Start', () => {
+            this.createMenuItem(200, 'Game Start', () => {
                 this.registry.set('selectedMenuItemIndex', 0);
                 this.scene.start('GameScene');
             }),
-            this.createMenuItem(400, 'Records', () => {
+            this.createMenuItem(300, 'Records', () => {
                 this.registry.set('selectedMenuItemIndex', 1);
                 this.scene.start('RecordsScene');
             }),
-            this.createMenuItem(500, 'Options', () => {
+            this.createMenuItem(400, 'Options', () => {
                 this.registry.set('selectedMenuItemIndex', 2);
                 this.scene.start('OptionsScene');
             })
         ];
+        
+        const connected = await RemoteStorageManager.checkConnection();
+
+        if (connected) {
+            this.menuItems.push(
+                this.createMenuItem(500, 'Leaderboard', () => {
+                    this.registry.set('selectedMenuItemIndex', 3);
+                    this.scene.start('LeaderboardScene');
+                })
+            );
+        }
     }
 
     private createMenuItem(y: number, text: string, action: () => void): Phaser.GameObjects.Text {

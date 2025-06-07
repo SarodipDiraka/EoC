@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { LocalStorageManager } from '../managers/local-storage-manager';
+import { RemoteStorageManager } from '../managers/remote-storage-manager';
+import { HighScoreRecord } from '../types/interfaces';
 
 export class InputScene extends Phaser.Scene {
     private inputText: Phaser.GameObjects.Text;
@@ -66,7 +68,7 @@ export class InputScene extends Phaser.Scene {
         const hint1 = this.add.text(
             this.cameras.main.width / 2, 
             400, 
-            '(MAX 12 CHARACTERS, NO SPACES)', 
+            '(MAX 9 CHARACTERS, NO SPACES)', 
             {
                 fontFamily: 'Arial',
                 fontSize: '24px',
@@ -118,25 +120,83 @@ export class InputScene extends Phaser.Scene {
         } else if (event.key === 'Backspace') {
             this.inputText.text = this.inputText.text.slice(0, -1);
         } else if ((isLetter || isNumber || isAllowedControlKey) && 
-                  this.inputText.text.length < 12) {
+                  this.inputText.text.length < 9) {
             // Для букв преобразуем в верхний регистр
             const charToAdd = isLetter ? event.key.toUpperCase() : event.key;
             this.inputText.text += charToAdd;
         }
     }
 
-    private saveScore() {
+    private async saveScore() {
         const name = this.inputText.text || 'PLAYER';
-        LocalStorageManager.addHighScore({
-            name: name.substring(0, 12).replace(/\s/g, ''),
+        const entryName = name.substring(0, 9).replace(/\s/g, '');
+
+        // Формируем новый рекорд
+        const newScore = {
+            name: entryName,
             score: this.score,
             level: this.level
-        });
-        
+        };
+
+        // Добавляем локально
+        const localUpdated = LocalStorageManager.addHighScore(newScore);
+
+        // Если синхронизация включена, синхронизируем с сервером
+        if (RemoteStorageManager.isSyncEnabled()) {
+            try {
+                // Отправляем новый рекорд на сервер, получаем обновлённый список с сервера
+                const remoteScores = await RemoteStorageManager.addHighScore(newScore);
+
+                if (remoteScores) {
+                    // Объединяем локальные и серверные записи, сортируем и сохраняем локально и на сервере
+                    const merged = this.mergeAndSortScores(localUpdated, remoteScores);
+                    
+                    // Сохраняем локально
+                    LocalStorageManager.saveHighScores(merged);
+                    await RemoteStorageManager.clearHighScores();
+                    for (const score of merged) {
+                        await RemoteStorageManager.addHighScore(score);
+                    }
+
+                }
+            } catch (error) {
+                console.error('Failed to sync high score:', error);
+            }
+        }
+
         this.inputActive = false;
         this.clearInputElements();
         this.showHighScores();
     }
+    
+    private mergeAndSortScores(
+        localScores: HighScoreRecord[], 
+        remoteScores: HighScoreRecord[]
+    ): HighScoreRecord[] {
+        // Объединяем массивы
+        const combined = [...localScores, ...remoteScores];
+
+        // Удаляем дубликаты по имени, уровню и очкам (если необходимо)
+        const uniqueMap = new Map<string, HighScoreRecord>();
+
+        for (const rec of combined) {
+            // Ключ для уникальности: name + score + level
+            const key = `${rec.name}_${rec.score}_${rec.level}`;
+            if (!uniqueMap.has(key)) {
+                uniqueMap.set(key, rec);
+            }
+        }
+
+        // Получаем уникальный массив
+        const uniqueScores = Array.from(uniqueMap.values());
+
+        // Сортируем по убыванию очков
+        const sorted = uniqueScores.sort((a, b) => b.score - a.score);
+
+        // Берём топ-10
+        return sorted.slice(0, 10);
+    }
+
 
     private showHighScores() {
         this.clearRecordsElements();
