@@ -5,7 +5,7 @@
     "scripts": {
         "dev": "next dev -p 8080",
         "build": "next build",
-        "export": "cross-env EXPORT_MODE=true next build && cpx \"out/**/*\" ./docs"
+        "export": "cross-env EXPORT_MODE=true next build && rimraf docs/EoC && cpx \"out/**/*\" docs/EoC"
     },
     "dependencies": {
         "@supabase/supabase-js": "^2.49.4",
@@ -26,6 +26,7 @@
         "@types/react-dom": "^18",
         "cpx": "^1.5.0",
         "cross-env": "^7.0.3",
+        "rimraf": "^6.0.1",
         "typescript": "^5"
     }
 }
