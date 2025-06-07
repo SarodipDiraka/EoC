@@ -8,13 +8,6 @@ const nextConfig = {
 
   trailingSlash: isExportMode,
 
-  ...(isExportMode
-    ? {
-        basePath: repoName,
-        assetPrefix: repoName,
-      }
-    : {}),
-
   typescript: {
     ignoreBuildErrors: true
   },
