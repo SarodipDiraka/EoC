@@ -14,10 +14,11 @@ import { AuthScene } from './scenes/auth-scene';
 import { LeaderboardScene } from './scenes/LeaderboardScene';
 
 const config: Phaser.Types.Core.GameConfig = {
-    type: AUTO,
+    type: Phaser.WEBGL,
     width: 480,
     height: 640,
     parent: 'game-container',
+    powerPreference: "high-performance",
     roundPixels: true,
     pixelArt: true,
     scale: {
