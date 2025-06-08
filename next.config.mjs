@@ -3,31 +3,14 @@ const isExportMode = process.env.EXPORT_MODE === 'true';
 
 const repoName = '/EoC';
 
-const basePath = isExportMode ? `/${repoName}` : '';
-
 const nextConfig = {
   output: isExportMode ? 'export' : 'standalone',
 
   trailingSlash: isExportMode,
-  basePath: basePath,
-  assetPrefix: isExportMode ? `https://sarodipdiraka.github.io${basePath}/` : undefined,
+  basePath: isExportMode ? `/${repoName}` : '',
+  assetPrefix: isExportMode ? `/${repoName}/` : '',
   images: {
     unoptimized: isExportMode,
-  },
-
-  headers: async () => {
-    if (isExportMode) return [];
-    return [
-      {
-        source: '/_next/static/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-    ];
   },
 
   typescript: {
@@ -35,13 +18,6 @@ const nextConfig = {
   },
   
   webpack: (config, { isServer, webpack }) => {
-    config.plugins.push(
-      new webpack.DefinePlugin({
-        'process.env.BASE_PATH': JSON.stringify(basePath),
-        'process.env.ASSET_PREFIX': JSON.stringify(isExportMode ? `https://sarodipdiraka.github.io${basePath}/` : '')
-      })
-    );
-
     config.plugins.push(new webpack.IgnorePlugin({
       resourceRegExp: /^cloudflare:sockets$/,
       contextRegExp: /.*/

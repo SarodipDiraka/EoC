@@ -10,8 +10,6 @@ export class BootScene extends Phaser.Scene {
     preload(): void {
         // Загрузка конфигурации анимаций
         // this.load.json('animations_json', 'assets/data/animations.json');
-        const baseURL = process.env.ASSET_PREFIX || '/';
-        this.load.setBaseURL(baseURL);
         this.load.json('animations_json', getAssetPath('assets/data/animations.json'));
         
         this.createProgressBar();

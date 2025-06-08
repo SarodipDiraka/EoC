@@ -1,11 +1,7 @@
+const isExportMode = process.env.EXPORT_MODE === 'true';
+const repoName = 'EoC';
+
 export const getAssetPath = (path: string) => {
-  const basePath = process.env.BASE_PATH || '';
-  const assetPrefix = process.env.ASSET_PREFIX || '';
-  
-  // Удаляем дублирующие слеши
-  const cleanPath = path.replace(/^\/+/, '').replace(/\/+/g, '/');
-  
-  return assetPrefix 
-    ? `${assetPrefix}${cleanPath}`
-    : `${basePath}/${cleanPath}`;
+    const cleanPath = path.replace(/^\/+/, '');
+    return isExportMode ? `/${repoName}/${cleanPath}` : `/${cleanPath}`;
 };
