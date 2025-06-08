@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const isExportMode = process.env.EXPORT_MODE === 'true';
 
-const repoName = '/EoC';
+const repoName = 'EoC';
 
 const nextConfig = {
   output: isExportMode ? 'export' : 'standalone',

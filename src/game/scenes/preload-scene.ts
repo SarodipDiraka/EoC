@@ -22,7 +22,6 @@ export class PreloadScene extends Phaser.Scene {
         this.createLoadingVisuals();
         
         // Загрузка основного пакета ассетов
-        // this.load.pack('asset_pack', 'assets/data/assets.json');
         this.load.pack('asset_pack', getAssetPath('assets/data/assets.json'));
         
         // Обработчики прогресса
