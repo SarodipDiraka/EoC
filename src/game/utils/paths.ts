@@ -1,6 +1,6 @@
+// Форсированная версия
 export const getGameAssetPath = (path: string) => {
-    if (process.env.EXPORT_MODE === 'true') {
-        return `${window.location.origin}/EoC/assets/${path}`;
-    }
-    return `/assets/${path}`;
+    return window.location.host.includes('github.io') 
+        ? `https://sarodipdiraka.github.io/EoC/assets/${path.replace(/^\//, '')}`
+        : `/assets/${path.replace(/^\//, '')}`;
 };
