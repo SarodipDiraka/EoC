@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { EventBus } from '../event-bus';
 import { getAssetPath } from '@/asset-paths';
+import { getGameAssetPath } from '../utils/paths';
 
 export class BootScene extends Phaser.Scene {
     constructor() {
@@ -9,7 +10,7 @@ export class BootScene extends Phaser.Scene {
 
     preload(): void {
         // Загрузка конфигурации анимаций
-        this.load.json('animations_json', getAssetPath('assets/data/animations.json'));
+        this.load.json('animations_json', getGameAssetPath('data/animations.json'));
         
         this.createProgressBar();
     }
