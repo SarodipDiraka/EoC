@@ -23,6 +23,11 @@ export class PreloadScene extends Phaser.Scene {
         
         // Загрузка основного пакета ассетов
         // this.load.pack('asset_pack', 'assets/data/assets.json');
+        if (process.env.EXPORT_MODE === 'true') {
+            this.load.setBaseURL(`https://yourusername.github.io/EoC}/`);
+        } else {
+            this.load.setBaseURL('/');
+        }
         this.load.pack('asset_pack', getAssetPath('assets/data/assets.json'));
         
         // Обработчики прогресса

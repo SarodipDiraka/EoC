@@ -13,18 +13,6 @@ const nextConfig = {
     unoptimized: isExportMode,
   },
 
-  async rewrites() {
-    if (isExportMode) {
-      return [
-        {
-          source: '/assets/:path*',
-          destination: '/assets/:path*',
-        },
-      ]
-    }
-    return [];
-  },
-
   typescript: {
     ignoreBuildErrors: true
   },
