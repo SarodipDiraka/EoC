@@ -7,8 +7,23 @@ const nextConfig = {
   output: isExportMode ? 'export' : 'standalone',
 
   trailingSlash: isExportMode,
-  assetPrefix: isExportMode ? `/${repoName}/` : undefined,
-  basePath: isExportMode ? `/${repoName}` : undefined,
+  basePath: isExportMode ? `/${repoName}` : '',
+  assetPrefix: isExportMode ? `/${repoName}/` : '',
+  images: {
+    unoptimized: isExportMode,
+  },
+
+  async rewrites() {
+    if (isExportMode) {
+      return [
+        {
+          source: '/assets/:path*',
+          destination: '/assets/:path*',
+        },
+      ]
+    }
+    return [];
+  },
 
   typescript: {
     ignoreBuildErrors: true
@@ -21,6 +36,14 @@ const nextConfig = {
     }));
 
     if (!isServer) {
+      config.module.rules.push({
+        test: /\.(json|png|jpg|gif|wav|mp3|html)$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[hash][ext][query]'
+        }
+      });
+
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,

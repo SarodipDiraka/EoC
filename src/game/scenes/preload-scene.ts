@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { EventBus } from '../event-bus';
+import { getAssetPath } from '@/asset-paths';
 
 interface AnimationData {
     key: string;
@@ -21,7 +22,8 @@ export class PreloadScene extends Phaser.Scene {
         this.createLoadingVisuals();
         
         // Загрузка основного пакета ассетов
-        this.load.pack('asset_pack', 'assets/data/assets.json');
+        // this.load.pack('asset_pack', 'assets/data/assets.json');
+        this.load.pack('asset_pack', getAssetPath('assets/data/assets.json'));
         
         // Обработчики прогресса
         this.load.on('progress', this.updateLoadingBar, this);
