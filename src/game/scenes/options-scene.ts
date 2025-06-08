@@ -35,7 +35,6 @@ export class OptionsScene extends Phaser.Scene {
         this.add.rectangle(0, 0, 50, 50, 0x000000).setOrigin(0).setDepth(1000);
 
         this.createConnectionStatus();
-        this.createAuthDisplay();
 
         this.createBackground();
         this.createTitle();
@@ -141,9 +140,13 @@ export class OptionsScene extends Phaser.Scene {
             if (connected) {
                 this.connectionStatusText.setText('Server: Connected ✅');
                 this.connectionStatusText.setColor('#00ff00');
+                this.createAuthDisplay();
             } else {
                 this.connectionStatusText.setText('Server: Local Mode ⚠️');
                 this.connectionStatusText.setColor('#ffff00');
+                if (this.authDisplayGroup) {
+                    this.authDisplayGroup.destroy(true);
+                }
             }
         };
 

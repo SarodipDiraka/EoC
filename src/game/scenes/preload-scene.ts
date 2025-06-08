@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { EventBus } from '../event-bus';
-import { getAssetPath } from '@/asset-paths';
-import { getGameAssetPath } from '../utils/paths';
+import { getGameAssetPath } from '@/asset-paths';
+
 
 interface AnimationData {
     key: string;
